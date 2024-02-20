@@ -1,6 +1,7 @@
 ﻿using AutomotiveEcommercePlatform.Server.Data;
 using AutomotiveEcommercePlatform.Server.DTOs.OrdersDTO;
 using DataBase_LastTesting.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             _userManager = userManager;
         }
 
+        [Authorize(Roles = "User")] // (Trader?)
         [HttpGet ]
         public async Task<IActionResult> GetOrderDetailsAsync([FromQuery] int orderId)
         {

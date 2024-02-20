@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ReactApp1.Server.Data;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AutomotiveEcommercePlatform.Server.Controllers
 {
@@ -21,17 +23,18 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             _userManager = userManager;
         }
 
+        [Authorize(Roles = "User")]
         [HttpPost]
         public async Task<IActionResult> AddTraderReviewAsync([FromQuery]string traderId,[FromBody]TraderReviewDTO dto)
         {
-
+            string userId = HttpContext.User.FindFirstValue("Id");
             if (dto.Rating > 5)
                 return BadRequest("The Rating cant exceed 5");
 
             var tradingtating = new TraderRating
             {
                 Rating = dto.Rating,
-                UserId = dto.UserId,
+                UserId = userId,
                 TraderId = traderId
             };
             await _context.AddAsync(tradingtating);
@@ -40,10 +43,12 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             return Ok(tradingtating);
         }
 
+        [Authorize(Roles = "User")]
         [HttpPost("CarReview")]
 
         public async Task<IActionResult> AddCarReviewAsync([FromQuery]int carId ,[FromBody]CarReviewDTO dto)
         {
+            string userId = HttpContext.User.FindFirstValue("Id");
             if (dto.Rating > 5)
                 return BadRequest("The Rating cant exceed 5");
 
@@ -51,7 +56,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             {
                 Rating = dto.Rating,
                 Comment = dto.Comment,
-                UserId = dto.UserId,
+                UserId = userId,
                 CarId = carId
             };
 

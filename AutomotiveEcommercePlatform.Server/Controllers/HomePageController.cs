@@ -1,5 +1,6 @@
 ﻿using AutomotiveEcommercePlatform.Server.Data;
 using DataBase_LastTesting.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,8 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             _userManager = userManager;
         }
 
+
+        [Authorize] // arg3
         [HttpGet]
 
         public async Task<IActionResult> GetTheMostExpensiveCarsAsync()

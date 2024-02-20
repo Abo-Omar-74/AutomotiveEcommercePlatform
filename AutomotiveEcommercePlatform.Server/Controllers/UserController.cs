@@ -1,4 +1,5 @@
-﻿using AutomotiveEcommercePlatform.Server.Data;
+﻿using System.Security.Claims;
+using AutomotiveEcommercePlatform.Server.Data;
 using AutomotiveEcommercePlatform.Server.DTOs.TraderDashboardDTOs;
 using AutomotiveEcommercePlatform.Server.DTOs.UserInfoDTO;
 using DataBase_LastTesting.Models;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReactApp1.Server.Data;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AutomotiveEcommercePlatform.Server.Controllers
 {
@@ -22,10 +24,11 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             _context = context;
             _userManager = userManager;
         }
-
+        [Authorize] // user + trader 
         [HttpPut]
-        public async Task<IActionResult> EditUserData([FromQuery] string userId , UpdateUserDto dto)
+        public async Task<IActionResult> EditUserData(UpdateUserDto dto)
         {
+            string userId = HttpContext.User.FindFirstValue("Id");
             var User = await _userManager.FindByIdAsync(userId);
             if (User == null)
                 return NotFound("The User does not exist!");
@@ -74,12 +77,22 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 User.PhoneNumber
             });
         }
+
+        [Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetTraderInfoAsync([FromQuery] string userId)
+        
+        public async Task<IActionResult> GetUserInfoAsync()
         {
+            string userId = HttpContext.User.FindFirstValue("Id");
             var User = await _userManager.FindByIdAsync(userId);
             if (User == null)
-                return NotFound("The User does not exist!");
+                return NotFound("User is not founded !");
+            
+            var roles = await  _userManager.GetRolesAsync(User);
+            if (roles == null)
+                return BadRequest("Something went Wrong!");
+
+            string role = roles.FirstOrDefault();
 
             return Ok(new
             {
@@ -87,7 +100,8 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 User.FirstName,
                 User.LastName,
                 User.Email,
-                User.PhoneNumber
+                User.PhoneNumber,
+                Role = role
             });
         }
     }

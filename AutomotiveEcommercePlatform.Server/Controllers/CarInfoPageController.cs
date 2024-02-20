@@ -10,6 +10,7 @@ using AutomotiveEcommercePlatform.Server.DTOs.CarInfoPageDTOs;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.IO.Pipelines;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace AutomotiveEcommercePlatform.Server.Controllers
@@ -26,6 +27,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             _userManager = userManager;
         }
 
+        [Authorize] 
         [HttpGet]
         public async Task<IActionResult> GetCarInfo(int carId)
         {

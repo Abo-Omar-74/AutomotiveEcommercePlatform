@@ -2,10 +2,12 @@
 using AutomotiveEcommercePlatform.Server.DTOs.CartDTOs;
 using AutomotiveEcommercePlatform.Server.Models;
 using DataBase_LastTesting.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReactApp1.Server.Data;
+using System.Security.Claims;
 
 namespace AutomotiveEcommercePlatform.Server.Controllers
 {
@@ -21,9 +23,11 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             _userManager = userManager;
         }
 
+        [Authorize(Roles = "User")] // User arg3
         [HttpGet("GetCartItems")]
-        public async Task<IActionResult> DeleteAsync(string userId)
+        public async Task<IActionResult> GetCartItems()
         {
+            string userId = HttpContext.User.FindFirstValue("Id");
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 return NotFound("User does not exist!");
@@ -36,7 +40,11 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 var car = await _context.Cars.SingleOrDefaultAsync(c => c.Id == carId);
                 if (car == null)
                 {
-                    error = "Some Cars has been removed by their trader";
+                    error += "Some Cars has been removed by their trader\n";
+                    continue;
+                }else if (car.InStock == false)
+                {
+                    error += "Some Cars has been Sold by Other Users\n";
                     continue;
                 }
                 cars.Add(car);
@@ -48,12 +56,17 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 Error = error, 
                 result = (error=="")
             };
+
+            if (responce.result == false)
+                return BadRequest(responce);
+
             return Ok(responce);
         }
-
+        [Authorize(Roles = "User")] // user
         [HttpPost("AddToCart")]
-        public async Task<IActionResult> AddToCart(string userId , int carId)
+        public async Task<IActionResult> AddToCart(int carId)
         {
+            string userId = HttpContext.User.FindFirstValue("Id");
             var car = await _context.Cars.SingleOrDefaultAsync(c => c.Id == carId);
             if (car == null)
                 return NotFound("Car does not found !");
@@ -84,9 +97,11 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             return Ok(cartItem);
         }
 
+        [Authorize(Roles = "User")] // user  arg9
         [HttpPost("ProceedToPay")]
-        public async Task<IActionResult> AddToCart(string userId)
+        public async Task<IActionResult> AddToCart()
         {
+            string userId = HttpContext.User.FindFirstValue("Id");
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 return NotFound("User does not exist!");
@@ -140,10 +155,11 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             return Ok(responce);
         }
 
+        [Authorize(Roles = "User")] // user
         [HttpDelete("DeleteFromCart")]
-        public async Task<IActionResult> DeleteAsync(string userId , int carId)
+        public async Task<IActionResult> DeleteAsync(int carId)
         {
-
+            string userId = HttpContext.User.FindFirstValue("Id");
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)

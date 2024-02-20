@@ -2,16 +2,18 @@
 using AutomotiveEcommercePlatform.Server.DTOs.AddressDTO;
 using AutomotiveEcommercePlatform.Server.Models;
 using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReactApp1.Server.Data;
+using System.Security.Claims;
 
 namespace AutomotiveEcommercePlatform.Server.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    [ApiController] 
     public class AddressControllers : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -23,10 +25,12 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             _userManager = userManager;
         }
 
+        [Authorize(Roles = "User")] // user
         [HttpPost]
 
-        public async Task<IActionResult> AddingAddressAsync([FromQuery]string userId,AddAddressDTO dto)
+        public async Task<IActionResult> AddingAddressAsync(AddAddressDTO dto)
         {
+            string userId = HttpContext.User.FindFirstValue("Id");
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 return NotFound("Not Found");
@@ -56,10 +60,12 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             return Ok(address);
         }
 
+        [Authorize(Roles = "User")] // user 
         [HttpGet]
 
-        public async Task<IActionResult> GetAddressAsync([FromQuery] string userId)
+        public async Task<IActionResult> GetAddressAsync()
         {
+            string userId = HttpContext.User.FindFirstValue("Id");
 
             var user = await _userManager.FindByIdAsync(userId);
 

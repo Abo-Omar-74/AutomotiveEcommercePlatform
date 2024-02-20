@@ -27,14 +27,15 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
         private readonly IConfiguration _configuration;
         private readonly IAuthService _authService;
         private readonly ApplicationDbContext _context;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-
-        public AuthenticationController(UserManager<ApplicationUser> userManager , IConfiguration configuration, IAuthService authService , ApplicationDbContext context)
+        public AuthenticationController(UserManager<ApplicationUser> userManager , IConfiguration configuration, IAuthService authService , ApplicationDbContext context , RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _configuration = configuration;
             _authService = authService;
             _context = context;
+            _roleManager = roleManager;
         }
 
 
@@ -127,7 +128,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 if (isCreated.Succeeded)
                 {
                     // Generate the token
-                    var token = GenerateJwtToken(newUser);
+                    var token = GenerateJwtToken(newUser , requestDto.Role);
 
                     var UserToRole = new AddRoleModel
                     {
@@ -198,7 +199,10 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                             "Invalid Email or Password !"
                         }
                     });
-                var jwtToken = GenerateJwtToken(existingUser);
+
+                var roles = await _userManager.GetRolesAsync(existingUser);
+                var onlyRole = roles.FirstOrDefault();
+                var jwtToken = GenerateJwtToken(existingUser , onlyRole);
                 return Ok(new AuthResult()
                 {
                     Result = true,
@@ -215,7 +219,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 }
             });
         }
-        private string GenerateJwtToken(ApplicationUser user)
+        private string GenerateJwtToken(ApplicationUser user , string role)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
@@ -227,12 +231,13 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("Id", user.Id),
+                    new Claim(ClaimTypes.Role, role),
                     new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                     new Claim(JwtRegisteredClaimNames.Email, value:user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToUniversalTime().ToString())
                 }),
-                Expires = DateTime.Now.AddMinutes(15), // will be changed 
+                Expires = DateTime.Now.AddDays(30), // will be changed 
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key) , SecurityAlgorithms.HmacSha256)
             };
 

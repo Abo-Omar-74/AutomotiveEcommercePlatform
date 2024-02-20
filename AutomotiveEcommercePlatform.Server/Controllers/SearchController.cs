@@ -2,6 +2,7 @@
 using AutomotiveEcommercePlatform.Server.DTOs.CarInfoPageDTOs;
 using AutomotiveEcommercePlatform.Server.DTOs.SearchDTOs;
 using DataBase_LastTesting.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -63,6 +64,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
         //    return Ok(carsInfo);
         //}
 
+        [Authorize] // user (trader?)
         [HttpGet]
         public async Task<IActionResult> GetFilteredCars([FromQuery]SearchDto searchDto , [FromQuery] int page=1)
         {

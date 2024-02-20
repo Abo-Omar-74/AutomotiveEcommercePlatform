@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using ReactApp1.Server.Data;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AutomotiveEcommercePlatform.Server.Controllers
 {
@@ -28,15 +30,11 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
 
 
 
-
+        [Authorize(Roles = "Trader")] // trader
         [HttpPut]
         public async Task<IActionResult> EditCarAsync([FromQuery] int carId , EditCarsDTO dto)
         {
             var car = _context.Cars.SingleOrDefault(g=>g.Id == carId);
-            //if (car == null)
-            //    return BadRequest("No Car was found with that Id"); sknce its gonna be onclick so its not needed
-            //if (dto.Price == car.Price)
-            //    return BadRequest("No changes were made");
             if (dto.CarCategory !=string.Empty){ car.CarCategory = dto.CarCategory; }
             if (dto.Price!=-1) {car.Price = dto.Price;}
             if (dto.BrandName != string.Empty){ car.BrandName = dto.BrandName;}
@@ -48,10 +46,11 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             return Ok(car);
         }
 
-
+        [Authorize(Roles = "Trader")] // trader
         [HttpGet]
-        public async Task<IActionResult> GetTraderCars([FromQuery]string traderId)
+        public async Task<IActionResult> GetTraderCars()
         {
+            string traderId = HttpContext.User.FindFirstValue("Id");
             var trader = await _context.Traders.SingleOrDefaultAsync(t => t.TraderId == traderId);
             if (trader == null)
                 return NotFound("Trader does not exist!");
@@ -64,10 +63,11 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             return Ok(cars);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateAsync([FromQuery]string traderId, [FromBody] AddCarDto addCarDto)
+        [Authorize(Roles = "Trader")] // trader
+        [HttpPost]  
+        public async Task<IActionResult> CreateAsync([FromBody] AddCarDto addCarDto)
         {
-            
+            string traderId = HttpContext.User.FindFirstValue("Id");
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             if (addCarDto == null|| traderId == null)
@@ -110,11 +110,12 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             _context.SaveChanges();
             return Ok(car);
         }
-        
 
+        [Authorize(Roles = "Trader")]
         [HttpDelete]
-        public async Task<IActionResult> DeleteAsync([FromQuery] string traderId,[FromQuery]int carId)
+        public async Task<IActionResult> DeleteAsync([FromQuery]int carId)
         {
+            string traderId = HttpContext.User.FindFirstValue("Id");
             var trader = await _context.Traders.SingleOrDefaultAsync(t => t.TraderId == traderId);
             if (trader == null)
                 return NotFound("Trader does not Exist!");
@@ -125,7 +126,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
 
            
 
-            if (car.TraderId == traderId)
+            if (car.TraderId != traderId)
                 return Unauthorized("This action is not allowed!");
 
             
