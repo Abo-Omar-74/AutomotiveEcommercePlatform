@@ -157,6 +157,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                         }
                         return Ok(new AuthResult()
                     {
+                        Role = requestDto.Role,
                         Result = true,
                         Token = token
                     });
@@ -205,6 +206,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 var jwtToken = GenerateJwtToken(existingUser , onlyRole);
                 return Ok(new AuthResult()
                 {
+                    Role = onlyRole,
                     Result = true,
                     Token = jwtToken
                 });
