@@ -82,7 +82,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 }
 
                 // Password Match 
-                if (requestDto.Password != requestDto.ConfirmePassword) 
+                if (requestDto.Password != requestDto.ConfirmPassword) 
                     return BadRequest(new AuthResult ()
                    {
                        Result = false ,
