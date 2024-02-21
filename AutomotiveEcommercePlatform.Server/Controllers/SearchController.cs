@@ -71,25 +71,37 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             if (searchDto == null)
                 return NotFound("Not Found the Page !");
 
-            IQueryable<Car> query = _context.Cars.Where(c=>c.InStock==true);
+            /* IQueryable<Car> query = _context.Cars.Where(c=>c.InStock==true)
+                 .Include(c => c.CarReviews); ;*/
+
+            var query = from car in _context.Cars
+                join review in _context.CarReviews
+                    on car.Id equals review.CarId into carReviews
+                from review in carReviews.DefaultIfEmpty()
+                where car.InStock == true
+                select new
+                {
+                    Car = car,
+                    Review = review
+                };
 
             if (!string.IsNullOrEmpty(searchDto.BrandName))
-                query = query.Where(q => q.BrandName.ToUpper().Contains(searchDto.BrandName.ToUpper()));
+                query = query.Where(q => q.Car.BrandName.ToUpper().Contains(searchDto.BrandName.ToUpper()));
 
             if (!string.IsNullOrEmpty(searchDto.CarCategory))
-                query = query.Where(q => q.CarCategory.ToUpper().Contains(searchDto.CarCategory.ToUpper()));
+                query = query.Where(q => q.Car.CarCategory.ToUpper().Contains(searchDto.CarCategory.ToUpper()));
 
             if (!string.IsNullOrEmpty(searchDto.ModelName))
-                query = query.Where(q => q.ModelName.ToUpper().Contains( searchDto.ModelName.ToUpper()));
+                query = query.Where(q => q.Car.ModelName.ToUpper().Contains( searchDto.ModelName.ToUpper()));
 
             if (searchDto.ModelYear!=null)
-                query = query.Where(q => q.ModelYear == searchDto.ModelYear);
+                query = query.Where(q => q.Car.ModelYear == searchDto.ModelYear);
 
             if (searchDto.minPrice != null)
-                query = query.Where(q => q.Price >= searchDto.minPrice);
+                query = query.Where(q => q.Car.Price >= searchDto.minPrice);
 
             if (searchDto.maxPrice != null)
-                query = query.Where(q => q.Price <= searchDto.maxPrice);
+                query = query.Where(q => q.Car.Price <= searchDto.maxPrice);
 
 
             var pageSize = 9;
