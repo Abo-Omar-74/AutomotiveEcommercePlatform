@@ -92,7 +92,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 query = query.Where(q => q.Price <= searchDto.maxPrice);
 
 
-            var pageSize = 3;
+            var pageSize = 9;
 
             var totalCount = query.Count();
 
