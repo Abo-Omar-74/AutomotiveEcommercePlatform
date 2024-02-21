@@ -60,12 +60,14 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 .ToListAsync();
             if (cars==null)
                 return NotFound("No Cars For this Trader !");
+
+
             return Ok(cars);
         }
 
         [Authorize(Roles = "Trader")] // trader
         [HttpPost]  
-        public async Task<IActionResult> CreateAsync([FromBody] AddCarDto addCarDto)
+        public async Task<IActionResult> AddCarsAsync([FromBody] AddCarDto addCarDto)
         {
             string traderId = HttpContext.User.FindFirstValue("Id");
             if (!ModelState.IsValid)
@@ -92,7 +94,8 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
                 return BadRequest("Missing a required field !");
             if (addCarDto.Price < 0)
                 return BadRequest("Price can not be negative !");
-            if (DateTime.Now.Year  < addCarDto.ModelYear || addCarDto.ModelYear < 1885)
+            int NewestPossibleModel = DateTime.Now.Year + 1;
+            if (NewestPossibleModel < addCarDto.ModelYear || addCarDto.ModelYear < 1885)
                 return BadRequest("Invalid Model Year!");
 
             var car = new Car()

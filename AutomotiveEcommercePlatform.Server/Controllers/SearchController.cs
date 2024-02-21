@@ -103,7 +103,15 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
 
             var cars = query.Skip((page-1)*pageSize).Take(pageSize).ToList();
 
-            return Ok(cars);
+
+            var result = new
+            {
+                TotalCount = totalCount,
+                Page = page,
+                Cars = cars
+            };
+
+            return Ok(result);
 
         }   
     }
