@@ -77,12 +77,13 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             var query = from car in _context.Cars
                 join review in _context.CarReviews
                     on car.Id equals review.CarId into carReviews
-                from review in carReviews.DefaultIfEmpty()
                 where car.InStock == true
                 select new
                 {
                     Car = car,
-                    Review = review
+                    Reviews = carReviews.ToList(),
+                    AverageRating = carReviews.Any() ? carReviews.Average(r => r.Rating) : 0 
+
                 };
 
             if (!string.IsNullOrEmpty(searchDto.BrandName))
@@ -120,7 +121,8 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             {
                 TotalCount = totalCount,
                 Page = page,
-                Cars = cars
+                Cars = cars.Select(q => new { Car = q.Car, Reviews = q.Reviews, AverageRating = q.AverageRating })
+
             };
 
             return Ok(result);

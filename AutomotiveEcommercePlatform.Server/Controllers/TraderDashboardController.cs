@@ -80,8 +80,7 @@ namespace AutomotiveEcommercePlatform.Server.Controllers
             if (validTrader == null)
                 return NotFound("Trader is not exists!");
 
-            if (!await _userManager.IsInRoleAsync(validTrader,"Trader"))
-                return BadRequest("UnAuthorized Party!");
+
 
             // check for required fields 
             if (addCarDto.BrandName == null ||
